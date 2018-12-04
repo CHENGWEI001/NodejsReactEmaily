@@ -4,21 +4,40 @@ const keys = require("../config/keys");
 const mongoose = require("mongoose");
 const User = mongoose.model("users") ;
 
+passport.serializeUser((user, done) => {
+    done(null, user.id);
+});
+
+passport.deserializeUser((id, done) => {
+    User.findById(id)
+        .then(user => {
+            done(null, user);
+        });
+});
+
 passport.use(new GoogleStrategy({
     clientID: keys.googleClientID,
     clientSecret: keys.googleClientSecret,
     callbackURL: "/auth/google/callback"
     },
-    (accessToken, refreshToken, profile, cb) => {
-        console.log(accessToken);
-        console.log();
-        console.log(refreshToken);
-        console.log();        
-        console.log(profile)
-        // new User({ googleId: profile.id }).save();
-        var tmp = new User({ googleId: profile.id });
-        tmp.save(function(error, user){
-            console.log(error);
-            console.log(user);
-        });
+    (accessToken, refreshToken, profile, done) => {
+        // console.log(accessToken);
+        // console.log();
+        // console.log(refreshToken);
+        // console.log();        
+        // console.log(profile)
+        User.findOne({googleId: profile.id})
+            .then((existingUser) => {
+                if (existingUser) {
+                    // we already have record for the given profile.id
+                    done(null, existingUser);
+                }
+                else {
+                    new User({ googleId: profile.id })
+                        .save()
+                        .then((user) => {
+                            done(null, user);
+                        })
+                }
+            })
     }));
