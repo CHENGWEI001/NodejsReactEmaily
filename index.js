@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 require("./models/User");
+require("./models/Survey");
 require("./services/passport"); // because the purpose here is just to execute that passport.js file
 const mongoose  = require("mongoose");
 const cookieSession = require("cookie-session");
@@ -25,6 +26,7 @@ app.use(passport.session());
 
 require("./routes/authRoutes")(app);
 require("./routes/billingRoutes")(app);
+require("./routes/surveyRoutes")(app);
 
 if (process.env.NODE_ENV === 'production') {
      app.use(express.static('client/build'));
